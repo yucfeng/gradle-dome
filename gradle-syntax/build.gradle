@@ -1,0 +1,27 @@
+task start {
+    doLast {
+        say()
+    }
+}
+
+def say() {
+    ant.echo(message: 'repeat')
+}
+
+3.times {
+    task "gradle$it" {
+        doLast{
+            println 'gradle rocks'
+        }
+    }
+}
+
+gradle0.dependsOn start
+gradle2.dependsOn gradle1, gradle0
+task group(dependsOn: gradle2)
+
+task repeatTest << {
+    2.times {
+        println "$it"
+    }
+}

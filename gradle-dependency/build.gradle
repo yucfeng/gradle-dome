@@ -1,0 +1,120 @@
+apply plugin: 'java-library'
+apply plugin: "ivy-publish"
+
+//Identifies project’s version
+version = 0.2
+//Sets Java version compilation compatibility
+sourceCompatibility = 1.8
+
+buildscript {
+    repositories {
+        maven {
+          url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url "http://repo1.maven.org/maven2/"
+        }
+        ivy {
+            url 'http://localhost:8081/artifactory/test-thirdparty'
+        }
+    }
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+    }
+}
+apply plugin: "com.jfrog.artifactory"
+// In this section you declare where to find the dependencies of your project
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // This dependency is exported to consumers, that is to say found on their compile classpath.
+    api 'org.apache.commons:commons-math3:3.6.1'
+    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
+    implementation 'com.google.guava:guava:23.0'
+    // Use JUnit test framework
+    testImplementation 'junit:junit:4.12'
+    // dependency used in compile
+    compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
+    // dependency used in compile test code
+    testCompile group: 'joda-time', name: 'joda-time', version: '2.9.9'
+    // dependency used in runtime
+    runtime fileTree(dir: 'private-jar', include: '*.jar')
+}
+
+artifactory {
+    contextUrl = "http://localhost:8081/artifactory"
+    publish {
+        repository {
+            repoKey = 'test-thirdparty'
+            if (project.hasProperty('artifactory_user')) {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+            maven = false
+            ivy {
+                ivyLayout = '[organization]/[module]/ivy-[revision].xml'
+                artifactLayout = '[organization]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]'
+                mavenCompatible = false
+            }
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'test-thirdparty'
+            maven = false
+            ivy {
+                ivyLayout = '[organization]/[module]/ivy-[revision].xml'
+                artifactLayout = "[organization]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"
+                mavenCompatible = false
+            }
+        }
+    }
+}
+
+configurations {
+    lib
+}
+
+dependencies {
+    lib (
+        [group: 'com.yucfeng', name: 'mysql-connector-java', version: '5.1.24', ext: 'jar']
+    )
+}
+
+task copyDependencies(type: Copy) {
+	into './'
+    into ('external/libs') {
+        from configurations.lib
+    }
+}
+
+publishing {
+ publications {
+    servicePackage(IvyPublication) {
+       module 'gradle-dependency'
+       organisation 'com.yucfeng'
+       revision "0.2"
+       artifact("./build/libs/gradle-dependency-0.2.jar") {
+        extension "jar"
+      }
+    }
+ }
+ repositories {
+  ivy {
+   layout 'pattern' , {
+    artifact "[organization]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"
+    ivy '[organization]/[module]/ivy-[revision].xml'
+   }
+   url "http://localhost:8081/artifactory/gradle-dome-release"
+   credentials {
+    username = "${artifactory_user}"
+    password = "${artifactory_password}"
+   }
+  }
+ }
+}
+

@@ -34,10 +34,11 @@ dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api 'org.apache.commons:commons-math3:3.6.1'
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'com.google.guava:guava:23.0'
+    implementation 'com.google.guava:guava:23.5'
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
     // dependency used in compile
+    compile 'com.google.guava:guava:23.5-jre'
     compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
     // dependency used in compile test code
     testCompile group: 'joda-time', name: 'joda-time', version: '2.9.9'
@@ -46,7 +47,7 @@ dependencies {
 }
 
 artifactory {
-    contextUrl = "http://localhost:8081/artifactory"
+    contextUrl = "http://192.168.125.171:8081/artifactory"
     publish {
         repository {
             repoKey = 'test-thirdparty'
@@ -79,19 +80,37 @@ configurations {
     lib
 }
 
+// dependencies info (defined by myself)
 dependencies {
     lib (
         [group: 'com.yucfeng', name: 'mysql-connector-java', version: '5.1.24', ext: 'jar']
     )
 }
 
+// download dependencies.lib into external/libs
 task copyDependencies(type: Copy) {
 	into './'
     into ('external/libs') {
         from configurations.lib
     }
 }
+// download compile dependencies into libs
+task downloadJars(type: Copy) {
+    from configurations.runtime into 'libs'
+}
 
+// run main()
+task runApp(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'hello.Hello'
+}
+
+// delete downloaded dependencies
+task cleanDependencies(type: Delete) {
+    delete './external/libs/', './libs/'
+}
+
+// publish this project to artifactory/gradle-dome-release in jar form
 publishing {
  publications {
     servicePackage(IvyPublication) {
@@ -118,3 +137,7 @@ publishing {
  }
 }
 
+// apply gradle wrapper in other env
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.3.1'
+}

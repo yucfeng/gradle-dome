@@ -21,10 +21,10 @@ dependencies {
             'javax.servlet.jsp:jsp-api:2.1'
     runtime 'javax.servlet:jstl:1.1.2',
             'taglibs:standard:1.1.2'
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api 'org.apache.commons:commons-math3:3.6.1'
-    // Use JUnit test framework
-    testImplementation 'junit:junit:4.12'
+}
+
+task cleanLog (type: Delete) {
+	delete './logs/'
 }
 
 task wrapper(type: Wrapper) {

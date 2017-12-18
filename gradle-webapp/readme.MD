@@ -1,7 +1,11 @@
+This is a simple webapp. We can run this webapp in Jetty.
+> In gradle 4+ we can use Gretty plugin.
+> In gradle 4- we can use Jetty plugin.
+
 ### Run Wep-app with Gretty plugin
 more info: *http://akhikhl.github.io/gretty-doc/index.html*
 
-#### apply plugin
+#### Apply plugin
 ```groovy
 apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
 ```
@@ -20,5 +24,8 @@ buildscript {
 }
 apply plugin: 'org.akhikhl.gretty'
 ``` 
+
+#### Run
+command: *gradle appRun*
 
 PS: Gretty cannot work with JDK 9 now.

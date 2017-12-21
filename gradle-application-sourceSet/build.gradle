@@ -1,19 +1,6 @@
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'java-library'
 
-/*
-// In this section you declare where to find the dependencies of your project
-repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
-}
-
-dependencies {
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'com.google.guava:guava:23.0'
-}
-*/
 //Identifies project’s version
 version = 0.1
 //Sets Java version compilation compatibility
@@ -24,30 +11,35 @@ repositories {
 }
 
 dependencies {
-	// This dependency is exported to consumers, that is to say found on their compile classpath.
-	api group: 'joda-time', name: 'joda-time', version: '2.9.9'
-	runtime group: 'joda-time', name: 'joda-time', version: '2.9.9'
-	compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
+    // This dependency is exported to consumers, that is to say found on their compile classpath.
+    api group: 'joda-time', name: 'joda-time', version: '2.9.9'
+    runtime group: 'joda-time', name: 'joda-time', version: '2.9.9'
+    compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.1'
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
 
 task runApp(type: JavaExec) {
-  classpath = sourceSets.main.runtimeClasspath
+    classpath = sourceSets.main.runtimeClasspath
 
-  main = 'hello.Hello'
+    main = 'hello.Hello'
 
-  // arguments to pass to the application
-  //args 'appArg1'
+    // arguments to pass to the application
+    //args 'appArg1'
 }
+
+apply plugin: 'application'
+mainClassName = "hello.Hello"
+// configure JVM settings or system properties
+applicationDefaultJvmArgs = ["-Dgreeting.language=en"]
 
 //Adds Main-Class header to JAR file’s manifest
 //generated MANIFEST.MF(简化Java应用程序的打包和发布) in out/tmp/jar/
 jar {
-	manifest {
-	    attributes 'Main-Class': 'hello.Hello'
-	}
+    manifest {
+        attributes 'Main-Class': 'hello.Hello'
+    }
 }
 
 //Replaces conventional source code directory with list of different directories
@@ -62,10 +54,13 @@ sourceSets {
     test {
         java {
             srcDirs = ['test']
-            }
         }
+    }
 }
 
 //Changes project output property to directory out
 buildDir = 'out'
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.3.1'
+}
